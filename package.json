@@ -1,0 +1,27 @@
+{
+  "name": "udemy_node",
+  "version": "1.0.0",
+  "description": "Udemy NodeJS",
+  "main": "server.js",
+  "scripts": {
+    "start": "NODE_ENV=production node server",
+    "dev": "nodemon server"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/garance-buricatu/Udemy_Node.git"
+  },
+  "author": "Garance Buricatu",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/garance-buricatu/Udemy_Node/issues"
+  },
+  "homepage": "https://github.com/garance-buricatu/Udemy_Node#readme",
+  "dependencies": {
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.7"
+  }
+}
