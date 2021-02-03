@@ -2,6 +2,10 @@ const express = require('express');
 const dotenv = require('dotenv');
 const morgan = require('morgan');
 const connectDB = require('./config/db');
+const colors = require('colors');
+
+// Middlwares
+const errorHandler = require('./middleware/error');
 
 /**
 *-------------------- EXPRESS APIs ---(see routes/bootcamps file)------------
@@ -49,6 +53,9 @@ const bootcamps = require('./routes/bootcamps');
 
 const app = express();
 
+// Body Parser --> allows APIs to use "req.body" variable
+app.use(express.json());
+
 //** Morgan dev logging middleware */
 if (process.env.NODE_ENV === 'development'){
     app.use(morgan('dev'));
@@ -57,14 +64,16 @@ if (process.env.NODE_ENV === 'development'){
 // Mount routers (from bootcamps file)
 app.use('/api/v1/bootcamps', bootcamps);
 
+app.use(errorHandler);
+
 const PORT = process.env.PORT || 7000;
 
 // run server
-const server = app.listen(PORT, console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`));
+const server = app.listen(PORT, console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`.yellow.bold));
 
 // Handle unhandled promise rejections (ie. async await promises)
 process.on('unhandledRejection', (err, promise) => {
-        console.log(`Error: ${err.message}`);
+        console.log(`Error: ${err.message}`.red);
 
         // Close server and exit process
         server.close(() => process.exit(1));
