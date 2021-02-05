@@ -101,6 +101,10 @@ const BootcampSchema = new mongoose.Schema({
       }
 });
 
+/**
+ * MONGOOSE MIDDLEWARE
+ */
+
 // Create bootcamp slug from the name
 BootcampSchema.pre('save', function(next) { // this will run before saving
 

@@ -13,8 +13,9 @@ const router = express.Router(); // allows api routes to be in different file th
 
 // However, API logic will be in a middleware file (see ./controllers/bootcamps.js)
     //1. bring in API names from '../controller/bootcamps
-    const { getBootcamps, getBootcamp, createBootcamp, updateBootcamp, deleteBootcamp } = require('../controllers/bootcamps')
+    const { getBootcamps, getBootcamp, createBootcamp, updateBootcamp, deleteBootcamp, getBootcampsInRadius } = require('../controllers/bootcamps')
     //2. 
+    router.route('/radius/:zipcode/:distance').get(getBootcampsInRadius);
     router.route('/').get(getBootcamps).post(createBootcamp);
     router.route('/:id').get(getBootcamp).put(updateBootcamp).delete(deleteBootcamp);
 
