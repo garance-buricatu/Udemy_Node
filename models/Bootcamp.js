@@ -99,6 +99,9 @@ const BootcampSchema = new mongoose.Schema({
         type: Date,
         default: Date.now
       }
+}, {
+  toJSON: { virtuals: true},
+  toObject: { virtuals: true }
 });
 
 /**
@@ -138,5 +141,25 @@ BootcampSchema.pre('save', async function(next) {
 
   next();
 });
+
+// Cascade delete courses when bootcamp is deleted (if bootcamp is deleted, delete all cooresponding courses)
+BootcampSchema.pre('remove', async function (next) {
+  console.log(`Courses are being removed from bootcamp ${this._id}`);
+
+  // Delete courses with bootcamp field = this._id (current bootcamp)
+      // Note: this must be "pre" middleware (if it were "post", since we are deleting the bootcamp, we would not be able to access "this" fields)
+  await this.model('Course').deleteMany({ bootcamp: this._id }); 
+  next();
+})
+
+// Reverse Populate with Virtuals (populate Bootcamp object with all courses it coresponds to)
+  // This creates a new field called 'courses' in Bootcamp model that holds all courses coresponding to bootcamp
+  // NOTE: this does NOT get saved on the DB
+BootcampSchema.virtual('courses', {
+  ref: 'Course',
+  localField: '_id',
+  foreignField: 'bootcamp', // field in the Course model that is tageted
+  justOne: false // need an array
+})
 
 module.exports = mongoose.model('Bootcamp', BootcampSchema);

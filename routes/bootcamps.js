@@ -1,6 +1,16 @@
 const express = require('express');
 
-const router = express.Router(); // allows api routes to be in different file than server.js
+// allows api routes to be in different file than server.js
+const router = express.Router();
+
+//Include other resource routers
+const courseRouter = require('./courses');
+
+// Re-route to other resource routers
+    // if this route is hit, will continue on to './courses' which will call the appropriate route
+    // allows re-routing so that no need to import 'getCourses' route in this file
+router.use('/:bootcampId/courses', courseRouter);
+
 
 // Notes: if APIs were in this file
     // 1. Replace "app.xxx" with "router.xxx"
@@ -13,9 +23,11 @@ const router = express.Router(); // allows api routes to be in different file th
 
 // However, API logic will be in a middleware file (see ./controllers/bootcamps.js)
     //1. bring in API names from '../controller/bootcamps
-    const { getBootcamps, getBootcamp, createBootcamp, updateBootcamp, deleteBootcamp, getBootcampsInRadius } = require('../controllers/bootcamps')
-    //2. 
+    const { getBootcamps, getBootcamp, createBootcamp, updateBootcamp, deleteBootcamp, getBootcampsInRadius, bootcampPhotoUpload } = require('../controllers/bootcamps')
+
+    // 2. 
     router.route('/radius/:zipcode/:distance').get(getBootcampsInRadius);
+    router.route('/:id/photo').put(bootcampPhotoUpload);
     router.route('/').get(getBootcamps).post(createBootcamp);
     router.route('/:id').get(getBootcamp).put(updateBootcamp).delete(deleteBootcamp);
 

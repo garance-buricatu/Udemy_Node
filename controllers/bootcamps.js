@@ -1,9 +1,8 @@
-const geocider = require('../utils/geocoder');
 const Bootcamp = require('../models/Bootcamp');
 const ErrorResponse = require('../utils/errorResponse');
 const asyncHandler = require('../middleware/async');
 const geocoder = require('../utils/geocoder');
-const { remove } = require('../models/Bootcamp');
+const path = require('path'); //core node module
 
 /**
  * NOTES
@@ -44,7 +43,7 @@ exports.getBootcamps = asyncHandler(async (req, res, next) => {
     queryStr = queryStr.replace(/\b(gt|gte|lt|lte|in)\b/g, match => `$${match}`);
 
     // Finding resource
-    query = Bootcamp.find(JSON.parse(queryStr)); //queryString is a string, needs to be a JS object
+    query = Bootcamp.find(JSON.parse(queryStr)).populate('courses'); //queryString is a string, needs to be a JS object
 
     // Select Fields ie. ?select=name,description will return only name and description of all entries
     if (req.query.select) {
@@ -157,9 +156,15 @@ exports.updateBootcamp = asyncHandler(async (req, res, next) => {
 // @route DELETE /api/v1/bootcamps/:id
 // @access Private
 exports.deleteBootcamp = asyncHandler(async (req, res, next) => {
-    const bootcamp = await Bootcamp.findByIdAndDelete(req.params.id);
+    // const bootcamp = await Bootcamp.findByIdAndDelete(req.params.id); --> "findbyIdAndDelete" will not trigger the delete middleware in Bootcamp.js model
+    
+    // INSTEAD, 1. get the bootcamp
+    const bootcamp = await Bootcamp.findById(req.params.id);
 
     if (!bootcamp) return next(new ErrorResponse(`Bootcamp not found with id of ${req.params.id}`, 404));
+
+    // 2. this will trigger middleware
+    bootcamp.remove();
 
     res.status(200).json({success: true, data: {}});
 });
@@ -188,5 +193,50 @@ exports.getBootcampsInRadius = asyncHandler(async (req, res, next) => {
         success: true,
         count: bootcamps.length,
         data: bootcamps
+    });
+});
+
+// @desc Upload a photo for bootcamp
+// @route PUT /api/v1/bootcamps/:id/photo
+// @access Private
+exports.bootcampPhotoUpload = asyncHandler(async (req, res, next) => {
+    
+    const bootcamp = await Bootcamp.findById(req.params.id);
+
+    if (!bootcamp) return next(new ErrorResponse(`Bootcamp not found with id of ${req.params.id}`, 404));
+
+    if (!req.files) return next(new ErrorResponse(`Please uoload file`, 400));
+
+    // console.log(req.files); --> see how file is sent by postman
+
+    const file = req.files.file;
+
+    // Make sure the image is a photo
+    if (!file.mimetype.startsWith('image')) {
+        return next(new ErrorResponse(`Please upload an image file`, 400));
+    }
+
+    // Check file size
+    if (file.size > process.env.MAX_FILE_UPLOAD) {
+        return next(new ErrorResponse(`Please upload an image less than ${process.env.MAX_FILE_UPLOAD}`, 400));
+    }
+
+    // Need to change file name (in case someone adds another photo with same name, it won't get overwritten)
+    file.name = `photo_${bootcamp._id}${path.parse(file.name).ext}`; // get extension of file name before changing it
+
+    //console.log(file.name);
+
+    file.mv(`${process.env.FILE_UPLOAD_PATH}/${file.name}`, async err => {
+        if (err){
+            console.error(err);
+            return next(new ErrorResponse(`Problem with file upload`, 500));
+        }
+
+        await Bootcamp.findByIdAndUpdate(req.params.id, { photo: file.name });
+
+        res.status(200).json({
+            success: true,
+            data: file.name
+        })
     });
 });
