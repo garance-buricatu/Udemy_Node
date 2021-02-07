@@ -3,6 +3,7 @@ const dotenv = require('dotenv');
 const morgan = require('morgan');
 const connectDB = require('./config/db');
 const fileupload = require('express-fileupload');
+const cookieParser = require('cookie-parser');
 const colors = require('colors');
 const path = require('path');
 
@@ -25,7 +26,8 @@ const errorHandler = require('./middleware/error');
 
 /**
  * ------------------- EXPRESS MIDDLEWARE-----------------------------
- * a function that has access to the req/res cycle and has access to that cycle
+ * a function that has access to the req/res cycle 
+ * 
  * whenever a req is made by the client, the testMiddleware function is going to run
  * 
  * EXAMPLE:
@@ -53,11 +55,16 @@ connectDB();
 // Import route files
 const bootcamps = require('./routes/bootcamps');
 const courses = require('./routes/courses');
+const auth = require('./routes/auth');
 
 const app = express();
 
 // Body Parser --> allows APIs to use "req.body" variable
 app.use(express.json());
+
+// Cookie Parser
+app.use(cookieParser())
+
 
 //** Morgan dev logging middleware */
 if (process.env.NODE_ENV === 'development'){
@@ -73,6 +80,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Mount routers (from bootcamps file)
 app.use('/api/v1/bootcamps', bootcamps);
 app.use('/api/v1/courses', courses);
+app.use('/api/v1/auth', auth);
 
 app.use(errorHandler);
 
