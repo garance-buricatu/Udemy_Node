@@ -7,7 +7,7 @@ const Bootcamp = require('../models/Bootcamp');
 
 //Middleware
 const advancedResults = require('../middleware/advancedResults');
-const { protect } = require('../middleware/auth');
+const { protect, authorize } = require('../middleware/auth');
 
 //Include other resource routers
 const courseRouter = require('./courses');
@@ -33,8 +33,8 @@ router.use('/:bootcampId/courses', courseRouter);
 
     // 2. 
     router.route('/radius/:zipcode/:distance').get(getBootcampsInRadius);
-    router.route('/:id/photo').put(protect, bootcampPhotoUpload);
-    router.route('/').get(advancedResults(Bootcamp, 'courses'), getBootcamps).post(protect, createBootcamp);
-    router.route('/:id').get(getBootcamp).put(protect, updateBootcamp).delete(protect, deleteBootcamp);
+    router.route('/:id/photo').put(protect, authorize('publisher', 'admin'), bootcampPhotoUpload); // NOTE: authorize middleware comes after protect bc changes the req.body and authorize uses this change
+    router.route('/').get(advancedResults(Bootcamp, 'courses'), getBootcamps).post(protect, authorize('publisher', 'admin'), createBootcamp);
+    router.route('/:id').get(getBootcamp).put(protect, authorize('publisher', 'admin'), updateBootcamp).delete(protect, authorize('publisher', 'admin'), deleteBootcamp);
 
 module.exports = router;
