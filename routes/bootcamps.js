@@ -11,12 +11,13 @@ const { protect, authorize } = require('../middleware/auth');
 
 //Include other resource routers
 const courseRouter = require('./courses');
+const reviewRouter = require('./reviews');
 
 // Re-route to other resource routers
     // if this route is hit, will continue on to './courses' which will call the appropriate route
     // allows re-routing so that no need to import 'getCourses' route in this file
 router.use('/:bootcampId/courses', courseRouter);
-
+router.use('/:bootcampId/reviews', reviewRouter);
 
 // Notes: if APIs were in this file
     // 1. Replace "app.xxx" with "router.xxx"

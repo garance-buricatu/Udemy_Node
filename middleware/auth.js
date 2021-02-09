@@ -20,11 +20,13 @@ const User = require('../models/User');
 exports.protect = asyncHandler(async (req, res, next) => {
     let token;
 
-    // can access all req headers with "req.headers"
+        // set token from headers - can access all req headers with "req.headers" -- all protected routes need Bearer authorization token for access
     if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')){
         token = req.headers.authorization.split(' ')[1];
+        
     } 
 
+    // set token from cookie -- will remember user after logged in -- no need for header Bearer authorization to access protected routes after logging in
     // else if (req.cookies.token) {
     //     token = req.cookies.token;
     // }

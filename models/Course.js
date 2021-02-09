@@ -73,7 +73,7 @@ const CourseSchema = new mongoose.Schema({
     } catch (err) {
         console.error(err);
     }
- }
+ };
 
 //Call getAverage Cost after save
 CourseSchema.post('save', function() {
